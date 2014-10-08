@@ -1,5 +1,6 @@
 var restify = require('restify'),
-    userSave = require('save')('user')
+    userSave = require('save')('user'),
+    cardSave = require('save')('card')
 
 var server = restify.createServer({ name: 'my-api' })
 
@@ -17,6 +18,19 @@ server
 server.get('/user', function (req, res, next) {
   userSave.find({}, function (error, users) {
     res.send(users)
+  })
+})
+
+server.post('/card/:user', function (req, res, next) {
+  console.log("req.params.name", req.params.name);
+  if (req.params.name === undefined || req.params.name == "") {
+    return next(new restify.InvalidArgumentError('Name must be supplied'))
+  }
+ 
+  cardSave.create({ name: req.params.name, user: req.params.id }, function (error, card) {
+    if (error) return next(new restify.InvalidArgumentError(JSON.stringify(error.errors)))
+ 
+    res.send(201, card)
   })
 })
 
